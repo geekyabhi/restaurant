@@ -31,5 +31,66 @@ const login=async (req,res)=>{
     }
 }
 
+const register=async(req,res)=>{
+    try{
+        const {name,email,password}=req.body
+        const user=new User({
+            name,email,password,tablesBooked:[]
+        })
+        const savedUser=await user.save()
 
-module.exports={login}
+        if(savedUser){
+            res.status(200).json({
+                success:true,
+                data:{
+                    _id:savedUser._id,
+                    name:savedUser.name,
+                    email:savedUser.email,
+                    tablesBooked:savedUser.tablesBooked,
+                    token:generateToken(savedUser._id)
+                }
+            })
+        }else{
+            res.status(400).json({
+                success:false,
+                error:'Invalid user data'
+            })
+        }
+
+    }catch(e){
+        return res.status(500).json({
+            success:false,
+            error:'Server error'
+        })
+    }
+}
+
+const updateUserProfile=async(req,res)=>{
+    try{
+        const user=await User.findById(req.user._id)
+        if(user){
+            user.name=req.body.name||user.name
+            user.email=req.body.email||user.email
+            if(req.body.password){
+                user.password=req.body.password
+            }
+        }
+        const updatedUser=await user.save()
+        res.status(200).json({
+            success:true,
+            data:{
+                _id:updatedUser._id,
+                name:updatedUser.name,
+                email:updatedUser.email,
+                token: generateToken(updatedUser._id)
+            }
+        })
+    }catch(e){
+        return res.status(500).json({
+            success:false,
+            error:'Server error'
+        })
+    }
+}
+
+module.exports={login,register,updateUserProfile}
