@@ -4,7 +4,6 @@ const tablechema = mongoose.Schema(
     {
         bookedBy:{
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
             ref: 'User',
         },
         number: {
@@ -18,8 +17,11 @@ const tablechema = mongoose.Schema(
         },
         isBooked:{
             type:Boolean,
-            required:true,
             default:false
+        },
+        addedBy:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'User'
         }
     },
     {

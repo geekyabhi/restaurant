@@ -33,9 +33,20 @@ const login=async (req,res)=>{
 
 const register=async(req,res)=>{
     try{
-        const {name,email,password}=req.body
+        const {name,email,password,isAdmin}=req.body
+        
+        
+        const existingUser=await User.findOne({email:email})
+
+        if(existingUser){
+            return res.status(400).json({
+                success:false,
+                error:'Email already exist'
+            })
+        }
+
         const user=new User({
-            name,email,password,tablesBooked:[]
+            name,email,password,tablesBooked:[],isAdmin
         })
         const savedUser=await user.save()
 
@@ -45,6 +56,7 @@ const register=async(req,res)=>{
                 data:{
                     _id:savedUser._id,
                     name:savedUser.name,
+                    isAdmin:savedUser.isAdmin,
                     email:savedUser.email,
                     tablesBooked:savedUser.tablesBooked,
                     token:generateToken(savedUser._id)
@@ -58,6 +70,7 @@ const register=async(req,res)=>{
         }
 
     }catch(e){
+        console.log(e)
         return res.status(500).json({
             success:false,
             error:'Server error'
@@ -80,6 +93,7 @@ const updateUserProfile=async(req,res)=>{
             success:true,
             data:{
                 _id:updatedUser._id,
+                isAdmin:updatedUser.isAdmin,
                 name:updatedUser.name,
                 email:updatedUser.email,
                 token: generateToken(updatedUser._id)
