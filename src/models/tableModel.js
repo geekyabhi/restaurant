@@ -2,10 +2,6 @@ const mongoose =require('mongoose')
 
 const tablechema = mongoose.Schema(
     {
-        bookedBy:{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
         number: {
             type: String,
             required: true,
@@ -15,10 +11,17 @@ const tablechema = mongoose.Schema(
             type: String,
             required: true,
         },
-        isBooked:{
-            type:Boolean,
-            default:false
-        },
+        bookingList:[
+            {
+                bookedBy:{
+                    type:mongoose.Schema.Types.ObjectId,
+                    ref:'User'
+                },
+                date:{
+                    type:Date
+                }
+            }
+        ],
         addedBy:{
             type:mongoose.Schema.Types.ObjectId,
             ref:'User'

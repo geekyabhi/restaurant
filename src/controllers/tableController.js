@@ -17,7 +17,7 @@ const addTable=async(req,res)=>{
                 error:'Not authorized as admin'
             })
         }
-        const table=new Table({number,price,addedBy:admin})
+        const table=new Table({number,price,addedBy:admin,bookingList:[]})
         const savedTable=await table.save()
         if(savedTable)
             return res.status(201).json({
@@ -60,7 +60,7 @@ const getTableDetail=async(req,res)=>{
                 _id:table._id,
                 price:table.price,
                 number:table.number,
-                isBooked:table.isBooked
+                bookingList:table.bookingList.map((booking)=>booking.date)
             }
         })
     }catch(e){
@@ -101,9 +101,8 @@ const getTableDetailForAdmin=async(req,res)=>{
                 _id:table._id,
                 price:table.price,
                 number:table.number,
-                isBooked:table.isBooked,
                 addedBy:table.addedBy,
-                bookedBy:table.bookedBy
+                bookingList:table.bookingList
             }
         })
     }catch(e){
@@ -133,7 +132,7 @@ const getAllTableDetails=async(req,res)=>{
 
 const updateTable=async(req,res)=>{
     try{
-        const {number,price,isBooked,bookedBy}=req.body
+        const {number,price,bookingList}=req.body
         if(!req.params.id){
             return req.status(400).json({
                 success:false,
@@ -157,11 +156,7 @@ const updateTable=async(req,res)=>{
         if(table){
             table.number=number||table.number
             table.price=price||table.price
-            table.isBooked=isBooked||table.isBooked
-            if(isBooked)
-                table.bookedBy=bookedBy||table.bookedBy
-            else
-                table.bookedBy=null
+            table.bookingList=bookingList||table.bookingList
         }
         const updatedTable=await table.save()
         if(updatedTable){

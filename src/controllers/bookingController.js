@@ -1,5 +1,7 @@
 const Bookings = require("../models/bookingModel")
 const Table = require("../models/tableModel")
+const moment=require('moment')
+
 
 const addBooking=async(req,res)=>{
     try{
@@ -19,11 +21,29 @@ const addBooking=async(req,res)=>{
                 error:'No such table exist'
             })
         }
+
+        let alreadyBooked
+        
+        table.bookingList.forEach((booking)=>{
+            if(moment(booking.date).isSame(tableBookedForDate))
+                alreadyBooked=true
+        })
+
+        if(alreadyBooked){
+            return res.status(400).json({
+                success:false,
+                error:'Table already booked for that time'
+            })
+        }
+
         const booking =new Bookings({tableBooked:tableId,dateOfBooking,tableBookedForDate,bookingBy:user._id})
         const savedBooking=await booking.save()
         if(savedBooking){
             table.bookedBy=user._id
-            table.isBooked=true
+            table.bookingList=[...table.bookingList,{
+                bookedBy:user._id,
+                date:tableBookedForDate
+            }]
             await table.save()
 
             user.tablesBooked=[...user.tablesBooked,table]
