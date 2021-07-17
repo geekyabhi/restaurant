@@ -3,9 +3,9 @@ const { adminProtect } = require('../../middleware/authMiddlewere')
 
 const router=require('express').Router()
 
-router.route('/').post(adminProtect,addBooking)
-router.route('/').get(adminProtect,getAllBooking)
-router.route('/:id').get(adminProtect,getBooking)
-router.route('/:id').delete(adminProtect,deleteBooking)
+router.route('/').post(adminProtect,addBooking) // '/api/admin/booking/'
+router.route('/').get(adminProtect,getAllBooking) // '/api/admin/booking/'
+router.route('/:id').get(adminProtect,getBooking) // '/api/admin/booking/:id'
+router.route('/:id').delete(adminProtect,deleteBooking) // '/api/admin/booking/:id'
 
 module.exports=router
