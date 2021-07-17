@@ -2,7 +2,7 @@ const {getTableDetail, getAllTableDetails} = require('../controllers/tableContro
 
 const router=require('express').Router()
 
-router.route('/').get(getAllTableDetails)
-router.route('/:id').get(getTableDetail)
+router.route('/').get(getAllTableDetails) // api/user/table
+router.route('/:id').get(getTableDetail) // api/user/table/:id
 
 module.exports=router
