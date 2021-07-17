@@ -1,5 +1,5 @@
-const User=require('../models/userModel')
-const generateToken=require('../utils/generateToken')
+const User=require('../../models/userModel')
+const generateToken=require('../../utils/generateToken')
 
 
 const login=async (req,res)=>{
@@ -35,6 +35,12 @@ const register=async(req,res)=>{
     try{
         const {name,email,password,isAdmin}=req.body
         
+        if(isAdmin){
+            return res.status(400).json({
+                success:false,
+                error:'Only admin can make you admin'
+            })
+        }
         
         const existingUser=await User.findOne({email:email})
 
@@ -56,7 +62,7 @@ const register=async(req,res)=>{
                 data:{
                     _id:savedUser._id,
                     name:savedUser.name,
-                    isAdmin:savedUser.isAdmin,
+                    isAdmin:false,
                     email:savedUser.email,
                     tablesBooked:savedUser.tablesBooked,
                     token:generateToken(savedUser._id)
@@ -88,12 +94,20 @@ const updateUserProfile=async(req,res)=>{
                 user.password=req.body.password
             }
         }
+
+        if(req.body.isAdmin){
+            return res.status(400).json({
+                success:false,
+                error:'Only admin can make you admin'
+            })
+        }
+
         const updatedUser=await user.save()
         res.status(200).json({
             success:true,
             data:{
                 _id:updatedUser._id,
-                isAdmin:updatedUser.isAdmin,
+                isAdmin:false,
                 name:updatedUser.name,
                 email:updatedUser.email,
                 token: generateToken(updatedUser._id)

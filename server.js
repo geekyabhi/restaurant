@@ -6,12 +6,11 @@ connectDB()
 app.use(express.json())
 const PORT=process.env.PORT||5000
 
-const userRouter=require('./src/routers/userRouter')
-const tableRouter=require('./src/routers/tableRouter')
-const bookingRouter=require('./src/routers/bookingRouter')
+const adminRoutes=require('./src/adminPanel/adminAPIS')
+const userRoutes=require('./src/userPanel/userAPIS')
 
-app.use('/api/user',userRouter)
-app.use('/api/table',tableRouter)
-app.use('/api/booking',bookingRouter)
+app.use('/api/admin',adminRoutes)
+app.use('/api/user',userRoutes)
+
 
 app.listen(PORT,()=>{console.log(`Server running on port ${PORT}`.yellow)})

@@ -1,4 +1,4 @@
-const Table = require("../models/tableModel")
+const Table = require("../../models/tableModel")
 
 const addTable=async(req,res)=>{
     try{
@@ -40,39 +40,6 @@ const addTable=async(req,res)=>{
 
 const getTableDetail=async(req,res)=>{
     try{
-        const id=req.params.id
-        if(!id){
-            return res.status(400).json({
-                success:false,
-                error:'No id detected'
-            })
-        }
-        const table=await Table.findById(id)
-        if(!table){
-            return res.status(400).json({
-                success:false,
-                error:'No such table found'
-            })
-        }
-        res.status(200).json({
-            success:true,
-            data:{
-                _id:table._id,
-                price:table.price,
-                number:table.number,
-                bookingList:table.bookingList.map((booking)=>booking.date)
-            }
-        })
-    }catch(e){
-        return res.status(500).json({
-            success:false,
-            error:'Server error'
-        })
-    }
-}
-
-const getTableDetailForAdmin=async(req,res)=>{
-    try{
         
         const admin=req.user
         if(!admin){
@@ -81,7 +48,7 @@ const getTableDetailForAdmin=async(req,res)=>{
                 error:'Not authorized as admin'
             })
         }
-        const id=req.params.id
+        const {id}=req.params
         if(!id){
             return res.status(400).json({
                 success:false,
@@ -115,7 +82,14 @@ const getTableDetailForAdmin=async(req,res)=>{
 
 const getAllTableDetails=async(req,res)=>{
     try{
-        const tables=await Table.find({}).select(['-bookedBy','-addedBy'])
+        const admin=req.user
+        if(!(admin&&admin.isAdmin)){
+            return res.status(401).json({
+                success:false,
+                error:'Not authorized as admin'
+            })
+        }
+        const tables=await Table.find({})
         res.status(200).json({
             success:true,
             data:tables
@@ -221,4 +195,4 @@ const deleteTable=async(req,res)=>{
     }
 }
 
-module.exports={addTable,updateTable,getTableDetail,getAllTableDetails,getTableDetailForAdmin,deleteTable}
+module.exports={addTable,updateTable,getTableDetail,getAllTableDetails,deleteTable}

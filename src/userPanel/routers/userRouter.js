@@ -1,6 +1,6 @@
 const router=require('express').Router()
 const {login, register, updateUserProfile} =require('../controllers/userController')
-const { protect } = require('../middleware/authMiddlewere')
+const { protect } = require('../../middleware/authMiddlewere')
 
 router.route('/login').post(login)
 router.route('/').post(register)
