@@ -1,5 +1,6 @@
 const Bookings = require("../../models/bookingModel")
 const Table = require("../../models/tableModel")
+const User=require('../../models/userModel')
 const moment=require('moment')
 
 
@@ -73,18 +74,24 @@ const getBooking=async(req,res)=>{
             })
         }
 
-        const {user}=req.user
+        const user=req.user
         if(!user){
             return res.status(400).json({
                 success:false,
                 error:'Not authorized'
             })
         }
-        const booking =await Bookings.findById(id)
+        const booking =await Bookings.findById(id).populate(['bookingBy','tableBooked'])
         if(!booking){
             return res.status(400).json({
                 success:false,
                 error:'No such booking found'
+            })
+        }
+        if(booking.bookingBy._id!==user._id){
+            return res.status(404).json({
+                success:false,
+                error:'Not authorized'
             })
         }
         res.status(200).json({
@@ -109,7 +116,7 @@ const getAllBooking=async(req,res)=>{
                 error:'Not authorized'
             })
         }
-        const bookings=await Bookings.find({bookingBy:user})
+        const bookings=await Bookings.find({bookingBy:user}).populate(['bookingBy','tableBooked'])
         if(!bookings){
             return res.status(404).json({
                 success:false,
@@ -129,4 +136,59 @@ const getAllBooking=async(req,res)=>{
     }
 }
 
-module.exports={addBooking,getBooking,getAllBooking}
+const deleteBooking=async(req,res)=>{
+    try{
+        const {id}=req.params
+        if(!id){
+            return res.status(400).json({
+                success:false,
+                error:'Cannot detect the id'
+            })
+        }
+        const user=req.user
+        if(!user){
+            return res.status(400).json({
+                success:false,
+                error:'Not authorized'
+            })
+        }
+        const booking =await Bookings.findById(id).populate(['bookingBy','tableBooked'])
+        if(!booking){
+            return res.status(400).json({
+                success:false,
+                error:'No such booking found'
+            })
+        }
+        if(booking.bookingBy._id!==user._id){
+            return res.status(404).json({
+                success:false,
+                error:'Not authorized'
+            })
+        }
+        const deletedBooking=await booking.remove()
+
+        const tableId=booking.tableBooked._id
+        const tableBookedForDate=booking.tableBooked.tableBookedForDate
+        const table=await Table.findById(tableId)
+        table.bookingList=table.bookingList.filter((booking)=>!moment(booking.date).isSame(tableBookedForDate))
+
+        const updatedTable=await table.save()
+        const userId=booking.bookingBy._id
+        const userCheck=await User.findById(userId)
+        userCheck.tablesBooked=userCheck.tablesBooked.filter((table)=>table._id!==tableId)
+        const updatedUser=await userCheck.save()
+
+        res.status(200).json({
+            success:true,
+            data:deletedBooking
+        })
+    }catch(e){
+        console.log(e)
+        return res.status(500).json({
+            success:false,
+            error:'Server error'
+        })
+    }
+}
+
+module.exports={addBooking,getBooking,getAllBooking,deleteBooking}

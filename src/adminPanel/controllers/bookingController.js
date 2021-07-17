@@ -150,13 +150,6 @@ const getAllBooking=async(req,res)=>{
     }
 }
 
-const updateBooking=async(req,res)=>{
-    try{
-
-    }catch(e){
-
-    }
-}
 
 const deleteBooking=async(req,res)=>{
     try{
@@ -207,4 +200,4 @@ const deleteBooking=async(req,res)=>{
     }
 }
 
-module.exports={addBooking,getBooking,getAllBooking,updateBooking,deleteBooking}
+module.exports={addBooking,getBooking,getAllBooking,deleteBooking}
