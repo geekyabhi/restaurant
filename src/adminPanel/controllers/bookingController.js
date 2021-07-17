@@ -150,4 +150,61 @@ const getAllBooking=async(req,res)=>{
     }
 }
 
-module.exports={addBooking,getBooking,getAllBooking}
+const updateBooking=async(req,res)=>{
+    try{
+
+    }catch(e){
+
+    }
+}
+
+const deleteBooking=async(req,res)=>{
+    try{
+        const {id}=req.params
+        const admin=req.user
+        if(!id){
+            return res.status(400).json({
+                success:false,
+                error:'No id Detected'
+            })
+        }
+        if(!(admin&&admin.isAdmin)){
+            return res.status(400).json({
+                success:false,
+                error:'Not authorized as admin'
+            })
+        }
+        const booking=await Bookings.findById(id).populate(['tableBooked','bookingBy'])
+        if(!booking){
+            return res.status(404).json({
+                success:false,
+                error:'No such booking found'
+            })
+        }
+        const deletedBooking=await booking.remove()
+        const tableId=booking.tableBooked._id
+        const tableBookedForDate=booking.tableBooked.tableBookedForDate
+        const table=await Table.findById(tableId)
+        table.bookingList=table.bookingList.filter((booking)=>!moment(booking.date).isSame(tableBookedForDate))
+
+        const updatedTable=await table.save()
+        const userId=booking.bookingBy._id
+        const user=await User.findById(userId)
+        user.tablesBooked=user.tablesBooked.filter((table)=>table._id!==tableId)
+        const updatedUser=await user.save()
+
+        res.status(201).json({
+            success:true,
+            data:deleteBooking
+        })
+
+    }catch(e){
+        console.log(e)
+        return res.status(500).json({
+            success:false,
+            error:'Server error'
+        })
+    }
+}
+
+module.exports={addBooking,getBooking,getAllBooking,updateBooking,deleteBooking}
