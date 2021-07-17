@@ -1,18 +1,19 @@
 const Bookings = require("../../models/bookingModel")
 const Table = require("../../models/tableModel")
+const User=require('../../models/userModel')
 const moment=require('moment')
 
 
 const addBooking=async(req,res)=>{
     try{
-        const user=req.user
-        if(!user){
+        const admin=req.user
+        if(!(admin && admin.isAdmin)){
             return res.status(401).json({
                 success:false,
-                error:'Not authorized'
+                error:'Not authorized as admin'
             })
         }
-        const {tableId,dateOfBooking,tableBookedForDate}=req.body
+        const {tableId,dateOfBooking,tableBookedForDate,userId}=req.body
         
         const table=await Table.findById(tableId)
         if(!table){
@@ -21,21 +22,31 @@ const addBooking=async(req,res)=>{
                 error:'No such table exist'
             })
         }
-
+        if(!userId){
+            return res.status(400).json({
+                success:false,
+                error:'Enter the user id'
+            })
+        }
+        const user=await User.findById(userId)
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                error:'No such user found'
+            })
+        }
         let alreadyBooked
         
         table.bookingList.forEach((booking)=>{
             if(moment(booking.date).isSame(tableBookedForDate))
                 alreadyBooked=true
         })
-
         if(alreadyBooked){
             return res.status(400).json({
                 success:false,
                 error:'Table already booked for that time'
             })
         }
-
         const booking =new Bookings({tableBooked:tableId,dateOfBooking,tableBookedForDate,bookingBy:user._id})
         const savedBooking=await booking.save()
         if(savedBooking){
@@ -45,10 +56,8 @@ const addBooking=async(req,res)=>{
                 date:tableBookedForDate
             }]
             await table.save()
-
             user.tablesBooked=[...user.tablesBooked,table]
             await user.save()
-
             res.status(200).json({
                 success:true,
                 data:savedBooking
@@ -72,12 +81,11 @@ const getBooking=async(req,res)=>{
                 error:'Cannot detect the id'
             })
         }
-
-        const {user}=req.user
-        if(!user){
+        const admin=req.user
+        if(!(admin && admin.isAdmin)){
             return res.status(400).json({
                 success:false,
-                error:'Not authorized'
+                error:'Not authorized as admin'
             })
         }
         const booking =await Bookings.findById(id)
@@ -102,14 +110,27 @@ const getBooking=async(req,res)=>{
 
 const getAllBooking=async(req,res)=>{
     try{
-        const user={req,res}
-        if(!user){
+        const admin=req.user
+        const {userId}=req.body
+        if(!(admin&&admin.isAdmin)){
             return res.status(400).json({
                 success:false,
-                error:'Not authorized'
+                error:'Not authorized as admin'
             })
         }
-        const bookings=await Bookings.find({bookingBy:user})
+        const user=await User.findById(userId)
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                error:'No such user found'
+            })
+        }
+        let bookings
+        if(userId){
+            bookings=await Bookings.find({bookingBy:user})
+        }else{
+            bookings=await Bookings.find({})
+        }
         if(!bookings){
             return res.status(404).json({
                 success:false,
