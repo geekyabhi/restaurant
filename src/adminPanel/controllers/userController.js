@@ -68,10 +68,25 @@ const getOneUsers=async(req,res)=>{
 
 const updateUserProfile=async(req,res)=>{
     try{
-        const user=await User.findById(req.user._id)
+        const admin=req.user
+        if(!(admin&&admin.isAdmin)){
+            return res.status(401).json({
+                success:false,
+                error:'Not authorised as admin'
+            })
+        }
+        const {id}=req.params
+        if(!id){
+            return res.status(400).json({
+                success:false,
+                error:"Cannot detect id"
+            })
+        }
+        const user=await User.findById(id)
         if(user){
             user.name=req.body.name||user.name
             user.email=req.body.email||user.email
+            user.isAdmin=req.body.isAdmin||user.isAdmin
             if(req.body.password){
                 user.password=req.body.password
             }
