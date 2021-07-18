@@ -13,7 +13,7 @@ const addBooking=async(req,res)=>{
                 error:'Not authorized as admin'
             })
         }
-        const {tableId,dateOfBooking,tableBookedForDate,userId}=req.body
+        const {tableId,tableBookedForDate,userId}=req.body
         
         const table=await Table.findById(tableId)
         if(!table){
@@ -47,7 +47,7 @@ const addBooking=async(req,res)=>{
                 error:'Table already booked for that time'
             })
         }
-        const booking =new Bookings({tableBooked:tableId,dateOfBooking,tableBookedForDate,bookingBy:user._id})
+        const booking =new Bookings({tableBooked:tableId,dateOfBooking:Date.now(),tableBookedForDate,bookingBy:user._id})
         const savedBooking=await booking.save()
         if(savedBooking){
             table.bookedBy=user._id
