@@ -46,7 +46,7 @@ const getOneUsers=async(req,res)=>{
                 error:'Not authorised as admin'
             })
         }
-        const user=await User.findById(id)
+        const user=await User.findById(id).select('-password')
         if(!user){
             return res.status(401).json({
                 success:false,
