@@ -119,7 +119,7 @@ const getAllBooking=async(req,res)=>{
             })
         }
         const user=await User.findById(userId)
-        if(!user){
+        if(userId&&!user){
             return res.status(404).json({
                 success:false,
                 error:'No such user found'
@@ -176,19 +176,19 @@ const deleteBooking=async(req,res)=>{
         }
         const deletedBooking=await booking.remove()
         const tableId=booking.tableBooked._id
-        const tableBookedForDate=booking.tableBooked.tableBookedForDate
+        const tableBookedForDate=booking.tableBookedForDate
         const table=await Table.findById(tableId)
         table.bookingList=table.bookingList.filter((booking)=>!moment(booking.date).isSame(tableBookedForDate))
 
         const updatedTable=await table.save()
         const userId=booking.bookingBy._id
         const user=await User.findById(userId)
-        user.tablesBooked=user.tablesBooked.filter((table)=>table._id!==tableId)
+        user.tablesBooked=user.tablesBooked.filter((table)=>String(table._id)!==String(tableId))
         const updatedUser=await user.save()
 
         res.status(201).json({
             success:true,
-            data:deleteBooking
+            data:deletedBooking
         })
 
     }catch(e){
