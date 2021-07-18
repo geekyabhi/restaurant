@@ -10,7 +10,7 @@ const getAllUsers=async(req,res)=>{
                 error:'Not authorised as admin'
             })
         }
-        const users=await User.find({})
+        const users=await User.find({}).select('-password')
         if(!users){
             return res.status(401).json({
                 success:false,
