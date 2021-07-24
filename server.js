@@ -12,7 +12,7 @@ const userRoutes = require("./src/userPanel/userAPIS");
 
 app.get("/", (req, res) => {
 	res.send({
-		message: `Server is running successfully ${PORT} ${process.env.REDIS_PORT}`,
+		message: `Express server is running successfully on ${PORT} and redis on ${process.env.REDIS_PORT}`,
 	});
 });
 
