@@ -19,6 +19,7 @@
 ## Setup Instructions
 
 Now do the following to setup project
+
 Make sure that you have redis and node installed on your system 
 
 ```bash
