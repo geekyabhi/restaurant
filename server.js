@@ -9,15 +9,8 @@ const REDIS_PORT = process.env.REDIS_URL || "http://127.0.0.1:6379";
 
 const adminRoutes = require("./src/adminPanel/adminAPIS");
 const userRoutes = require("./src/userPanel/userAPIS");
-const redisClient = require("./src/redis/redisServer");
 
 app.get("/", (req, res) => {
-	console.log(redisClient);
-	if (redisClient) {
-		res.send({
-			message: `Express running on ${PORT} and redis running on ${REDIS_PORT} and mongoDB running on `,
-		});
-	}
 	res.send({
 		message: "Server is running successfully",
 	});
