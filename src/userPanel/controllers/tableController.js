@@ -26,6 +26,7 @@ const getTableDetail = async (req, res) => {
 				number: table.number,
 				bookingList: table.bookingList.map((booking) => booking.date),
 			},
+			redis: true,
 		});
 	} catch (e) {
 		console.log(e);

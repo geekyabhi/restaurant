@@ -13,6 +13,7 @@ const cache = (req, res, next) => {
 				res.status(200).send({
 					success: true,
 					data: jsonData,
+					redis: true,
 				});
 			} else {
 				next();
@@ -28,6 +29,7 @@ const cache = (req, res, next) => {
 				res.status(200).send({
 					success: true,
 					data: jsonData,
+					redis: true,
 				});
 			} else {
 				next();
