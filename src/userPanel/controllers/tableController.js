@@ -1,5 +1,5 @@
 const Table = require("../../models/tableModel");
-const redisClient = require("../../redis/redisServer");
+// const redisClient = require("../../redis/redisServer");
 
 const getTableDetail = async (req, res) => {
 	try {
@@ -17,7 +17,7 @@ const getTableDetail = async (req, res) => {
 				error: "No such table found",
 			});
 		}
-		redisClient.setex(id, 7200, JSON.stringify(table));
+		// redisClient.setex(id, 7200, JSON.stringify(table));
 		res.status(200).json({
 			success: true,
 			data: {
@@ -39,7 +39,7 @@ const getTableDetail = async (req, res) => {
 const getAllTableDetails = async (req, res) => {
 	try {
 		const tables = await Table.find({}).select(["-bookedBy", "-addedBy"]);
-		redisClient.setex("tables", 7200, JSON.stringify(tables));
+		// redisClient.setex("tables", 7200, JSON.stringify(tables));
 		res.status(200).json({
 			success: true,
 			data: tables,

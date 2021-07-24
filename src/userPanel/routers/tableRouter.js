@@ -1,4 +1,4 @@
-const cache = require("../../middleware/cacheMiddlewere");
+// const cache = require("../../middleware/cacheMiddlewere");
 const {
 	getTableDetail,
 	getAllTableDetails,
@@ -6,7 +6,7 @@ const {
 
 const router = require("express").Router();
 
-router.route("/").get(cache, getAllTableDetails); // api/user/table
-router.route("/:id").get(cache, getTableDetail); // api/user/table/:id
+router.route("/").get(getAllTableDetails); // api/user/table
+router.route("/:id").get(getTableDetail); // api/user/table/:id
 
 module.exports = router;
