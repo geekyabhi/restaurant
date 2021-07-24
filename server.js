@@ -12,7 +12,7 @@ const userRoutes = require("./src/userPanel/userAPIS");
 
 app.get("/", (req, res) => {
 	res.send({
-		message: "Server is running successfully",
+		message: `Server is running successfully ${process.env.REDIS_URL}`,
 	});
 });
 
