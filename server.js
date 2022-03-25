@@ -1,15 +1,16 @@
 const express = require("express");
 const cors = require("cors");
-require("colors");
-require("./src/redis/redisServer");
 const morgan = require("morgan");
-const { connectDB } = require("./src/db/mongoose");
-const { activateApi } = require("./src/APIS/api");
+require("colors");
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
 const PORT = process.env.PORT || 5000;
+
+const { connectDB } = require("./src/db/mongoose");
+const { activateApi } = require("./src/APIS/api");
 
 connectDB()
 	.then((res) => {
