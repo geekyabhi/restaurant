@@ -1,5 +1,6 @@
-const Table = require("../../models/tableModel");
-const redisClient = require("../../redis/redisServer");
+const Table = require("../../../models/tableModel");
+
+const redisClient = require("../../../redis/redisServer");
 
 const getTableDetail = async (req, res) => {
 	try {

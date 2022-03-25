@@ -1,4 +1,4 @@
-const cache = require("../../middleware/cacheMiddlewere");
+const cache = require("../../../middleware/cacheMiddlewere");
 const {
 	getTableDetail,
 	getAllTableDetails,
