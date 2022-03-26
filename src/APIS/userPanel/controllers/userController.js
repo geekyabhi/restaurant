@@ -1,53 +1,60 @@
 const User = require("../../../models/userModel");
 const generateToken = require("../../../utils/generateToken");
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
 	try {
 		const { email, password } = req.body;
+
+		if (!email || !password) {
+			res.statusCode = 400;
+			throw new Error("Fields missing");
+		}
+
 		const user = await User.findOne({ email });
 
 		if (user && (await user.matchPassword(password))) {
+			const token = generateToken(user._id);
+			const tokensArray = [...user.tokens, token];
+			user.tokens = tokensArray;
+			await user.save();
+
 			res.status(200).json({
 				success: true,
 				data: {
 					_id: user._id,
 					name: user.name,
 					email: user.email,
-					token: generateToken(user._id),
+					token: token,
 				},
 			});
 		} else {
-			return res.status(401).json({
-				success: false,
-				error: "Wrong email or password",
-			});
+			res.statusCode = 400;
+			throw new Error("Wrong id or password");
 		}
 	} catch (e) {
-		return res.status(500).json({
-			success: false,
-			error: "Server error",
-		});
+		next(e);
 	}
 };
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
 	try {
 		const { name, email, password, isAdmin } = req.body;
 
+		if (!email || !password || !name) {
+			res.statusCode = 400;
+			throw new Error("Fields missing");
+		}
+
 		if (isAdmin) {
-			return res.status(400).json({
-				success: false,
-				error: "Only admin can make you admin",
-			});
+			res.statusCode = 400;
+			throw new Error("Only admin can make you admin");
 		}
 
 		const existingUser = await User.findOne({ email: email });
 
 		if (existingUser) {
-			return res.status(400).json({
-				success: false,
-				error: "Email already exist",
-			});
+			res.statusCode = 400;
+			throw new Error("Email already exists");
 		}
 
 		const user = new User({
@@ -68,25 +75,18 @@ const register = async (req, res) => {
 					isAdmin: false,
 					email: savedUser.email,
 					tablesBooked: savedUser.tablesBooked,
-					token: generateToken(savedUser._id),
 				},
 			});
 		} else {
-			res.status(400).json({
-				success: false,
-				error: "Invalid user data",
-			});
+			res.statusCode = 400;
+			throw new Error("Wrong data");
 		}
 	} catch (e) {
-		console.log(e);
-		return res.status(500).json({
-			success: false,
-			error: "Server error",
-		});
+		next(e);
 	}
 };
 
-const updateUserProfile = async (req, res) => {
+const updateUserProfile = async (req, res, next) => {
 	try {
 		const user = await User.findById(req.user._id);
 		if (user) {
@@ -98,10 +98,8 @@ const updateUserProfile = async (req, res) => {
 		}
 
 		if (req.body.isAdmin) {
-			return res.status(400).json({
-				success: false,
-				error: "Only admin can make you admin",
-			});
+			res.statusCode = 400;
+			throw new Error("Only admin can make you admin");
 		}
 
 		const updatedUser = await user.save();
@@ -116,11 +114,47 @@ const updateUserProfile = async (req, res) => {
 			},
 		});
 	} catch (e) {
-		return res.status(500).json({
-			success: false,
-			error: "Server error",
-		});
+		next(e);
 	}
 };
 
-module.exports = { login, register, updateUserProfile };
+const findOne = async (req, res, next) => {
+	try {
+		const loggedUser = req.user;
+		const user = await User.findById(loggedUser.id)
+			.select(["-password", "-__v", "-tokens"])
+			.populate([
+				{
+					path: "tablesBooked",
+					select: ["-bookingList", "-__v", "-addedBy"],
+				},
+			]);
+		return res.status(200).send({
+			success: true,
+			data: user,
+		});
+	} catch (e) {
+		next(e);
+	}
+};
+
+const logout = async (req, res, next) => {
+	try {
+		const loggedUser = req.user;
+		const user = await User.findById(loggedUser.id);
+		const currentToken = req.currentToken;
+		const currentTokens = user.tokens.filter((token) => {
+			if (token !== currentToken) return token;
+		});
+		user.tokens = currentTokens;
+		await user.save();
+		return res.status(201).send({
+			success: true,
+			message: "Successfully logged out",
+		});
+	} catch (e) {
+		next(e);
+	}
+};
+
+module.exports = { login, register, updateUserProfile, logout, findOne };

@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 5000;
 
 const { connectDB } = require("./src/db/mongoose");
 const { activateApi } = require("./src/APIS/api");
+const { errorHandler } = require("./src/middleware/errorHandler");
 
 connectDB()
 	.then((res) => {
@@ -21,12 +22,12 @@ connectDB()
 			});
 		});
 		app.use("/api", activateApi());
+		app.use(errorHandler);
+		app.listen(PORT, () => {
+			console.log(`Server running on port ${PORT}`.yellow);
+		});
 	})
 	.catch((e) => {
 		console.log(`${e}`.red);
 		process.exit(1);
 	});
-
-app.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`.yellow);
-});
