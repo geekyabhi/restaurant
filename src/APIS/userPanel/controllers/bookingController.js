@@ -3,23 +3,20 @@ const Table = require("../../../models/tableModel");
 const User = require("../../../models/userModel");
 const moment = require("moment");
 
-const addBooking = async (req, res) => {
+const addBooking = async (req, res, next) => {
 	try {
 		const user = req.user;
 		if (!user) {
-			return res.status(401).json({
-				success: false,
-				error: "Not authorized",
-			});
+			res.statusCode = 401;
+			throw new Error("Not authorized");
 		}
+
 		const { tableId, tableBookedForDate } = req.body;
 
 		const table = await Table.findById(tableId);
 		if (!table) {
-			return res.status(400).json({
-				success: false,
-				error: "No such table exist",
-			});
+			res.statusCode = 400;
+			throw new Error("No such table exist");
 		}
 
 		let alreadyBooked;
@@ -30,10 +27,8 @@ const addBooking = async (req, res) => {
 		});
 
 		if (alreadyBooked) {
-			return res.status(400).json({
-				success: false,
-				error: "Table already booked for that time",
-			});
+			res.statusCode = 400;
+			throw new Error("Table already booked for that time");
 		}
 
 		const booking = new Bookings({
@@ -63,89 +58,65 @@ const addBooking = async (req, res) => {
 			});
 		}
 	} catch (e) {
-		console.log(e);
-		return res.status(500).json({
-			success: false,
-			error: "Server error",
-		});
+		next(e);
 	}
 };
 
-const getBooking = async (req, res) => {
+const getBooking = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		if (!id) {
-			return res.status(400).json({
-				success: false,
-				error: "Cannot detect the id",
-			});
+			res.statusCode = 400;
+			throw new Error("Can not detect the id");
 		}
 
 		const user = req.user;
 		if (!user) {
-			return res.status(400).json({
-				success: false,
-				error: "Not authorized",
-			});
+			res.statusCode = 401;
+			throw new Error("Not authorized");
 		}
 		const booking = await Bookings.findById(id).populate("tableBooked", [
 			"price",
 			"number",
 		]);
 		if (!booking) {
-			return res.status(400).json({
-				success: false,
-				error: "No such booking found",
-			});
+			res.statusCode = 400;
+			throw new Error("No such booking found");
 		}
 		if (String(booking.bookingBy._id) !== String(user._id)) {
-			return res.status(404).json({
-				success: false,
-				error: "Not authorized",
-			});
+			res.statusCode = 401;
+			throw new Error("Not authorized");
 		}
 		res.status(200).json({
 			success: true,
 			data: booking,
 		});
 	} catch (e) {
-		console.log(e);
-		return res.status(500).json({
-			success: false,
-			error: "Server error",
-		});
+		next(e);
 	}
 };
 
-const getAllBooking = async (req, res) => {
+const getAllBooking = async (req, res, next) => {
 	try {
 		const user = req.user;
 		if (!user) {
-			return res.status(400).json({
-				success: false,
-				error: "Not authorized",
-			});
+			res.statusCode = 401;
+			throw new Error("Not authorized");
 		}
 		const bookings = await Bookings.find({ bookingBy: user }).populate(
 			"tableBooked",
 			["number", "price"]
 		);
 		if (!bookings) {
-			return res.status(404).json({
-				success: false,
-				error: "Not found",
-			});
+			res.statusCode = 404;
+			throw new Error("Not found");
 		}
 		res.status(200).json({
 			success: true,
 			data: bookings,
 		});
 	} catch (e) {
-		console.log(e);
-		return res.status(500).json({
-			success: false,
-			error: "Server error",
-		});
+		next(e);
 	}
 };
 
@@ -153,33 +124,25 @@ const deleteBooking = async (req, res) => {
 	try {
 		const { id } = req.params;
 		if (!id) {
-			return res.status(400).json({
-				success: false,
-				error: "Cannot detect the id",
-			});
+			res.statusCode = 400;
+			throw new Error("Can not detect the id");
 		}
 		const user = req.user;
 		if (!user) {
-			return res.status(400).json({
-				success: false,
-				error: "Not authorized",
-			});
+			res.statusCode = 401;
+			throw new Error("Not authorized");
 		}
 		const booking = await Bookings.findById(id).populate([
 			"bookingBy",
 			"tableBooked",
 		]);
 		if (!booking) {
-			return res.status(400).json({
-				success: false,
-				error: "No such booking found",
-			});
+			res.statusCode = 404;
+			throw new Error("No such booking found");
 		}
 		if (String(booking.bookingBy._id) !== String(user._id)) {
-			return res.status(404).json({
-				success: false,
-				error: "Not authorized",
-			});
+			res.statusCode = 401;
+			throw new Error("Not authorized");
 		}
 		const deletedBooking = await booking.remove();
 
@@ -189,13 +152,6 @@ const deleteBooking = async (req, res) => {
 		table.bookingList = table.bookingList.filter(
 			(booking) => !moment(booking.date).isSame(tableBookedForDate)
 		);
-		// table.bookingList=table.bookingList.filter((booking)=>{
-		//     console.log(booking.date,"##",tableBookedForDate)
-		//     if(moment(booking.date).isSame(tableBookedForDate))
-		//     {}else{
-		//         return booking
-		//     }
-		// })
 
 		const updatedTable = await table.save();
 		const userId = booking.bookingBy._id;
@@ -210,11 +166,7 @@ const deleteBooking = async (req, res) => {
 			data: deletedBooking,
 		});
 	} catch (e) {
-		console.log(e);
-		return res.status(500).json({
-			success: false,
-			error: "Server error",
-		});
+		next(e);
 	}
 };
 

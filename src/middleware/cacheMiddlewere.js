@@ -9,12 +9,13 @@ const cache = (req, res, next) => {
 				throw error;
 			}
 			if (data) {
-				const jsonData = JSON.parse(data);
-				res.status(200).send({
-					success: true,
-					data: jsonData,
-					redis: true,
-				});
+				next();
+				// const jsonData = JSON.parse(data);
+				// res.status(200).send({
+				// 	success: true,
+				// 	data: jsonData,
+				// 	redis: true,
+				// });
 			} else {
 				next();
 			}
@@ -25,12 +26,13 @@ const cache = (req, res, next) => {
 				throw error;
 			}
 			if (data) {
-				const jsonData = JSON.parse(data);
-				res.status(200).send({
-					success: true,
-					data: jsonData,
-					redis: true,
-				});
+				next();
+				// const jsonData = JSON.parse(data);
+				// res.status(200).send({
+				// 	success: true,
+				// 	data: jsonData,
+				// 	redis: true,
+				// });
 			} else {
 				next();
 			}
