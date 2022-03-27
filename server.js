@@ -1,11 +1,16 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const helmet = require("helmet");
+const compression = require("compression");
 require("colors");
+require("log-timestamp");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(helmet());
+app.use(compression());
 app.use(morgan("dev"));
 const PORT = process.env.PORT || 5000;
 
