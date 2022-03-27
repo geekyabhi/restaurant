@@ -27,6 +27,22 @@ connectDB()
 			});
 		});
 		app.use("/api", activateApi());
+		app.use("/api/*", (req, res, next) => {
+			try {
+				res.statusCode = 404;
+				throw new Error("No such api exist");
+			} catch (e) {
+				next(e);
+			}
+		});
+		app.use("/*", (re, res, next) => {
+			try {
+				res.statusCode = 404;
+				throw new Error("No such api exist");
+			} catch (e) {
+				next(e);
+			}
+		});
 		app.use(errorHandler);
 		app.listen(PORT, () => {
 			console.log(`Server running on port ${PORT}`.yellow);
