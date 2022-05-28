@@ -1,6 +1,6 @@
 ## Application overview -
 
-- A server API of a online restaurant system of booking and viewing tables .
+- A server API of a online restaurant system of booking and viewing tables.
 - Having two panels -> User panel and the Admin panel 
 - Admin having permissions of CRUD over tables and other normal user profiles.
 - Using the redis caching system for the fast responses.
